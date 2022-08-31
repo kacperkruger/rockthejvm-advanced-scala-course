@@ -55,17 +55,12 @@ class NotEmptySet[A](head: A, tail: MySet[A]) extends MySet[A] {
     tail.foreach(f)
   }
 
-  override def -(elem: A): MySet[A] = this.filter(x => x != elem)
+  override def -(elem: A): MySet[A] = filter(x => x != elem)
 
-  override def intersect(anotherSet: MySet[A]): MySet[A] = if (
-    anotherSet.contains(this.head)
-  ) tail.intersect(anotherSet) + head
-  else tail.intersect(anotherSet)
+  override def intersect(anotherSet: MySet[A]): MySet[A] = filter(anotherSet)
 
-  override def --(anotherSet: MySet[A]): MySet[A] = if (
-    !anotherSet.contains(this.head)
-  ) tail.difference(anotherSet) + head
-  else tail.difference(anotherSet)
+  override def --(anotherSet: MySet[A]): MySet[A] = filter(x => !anotherSet(x))
+
 }
 
 object MySet {
