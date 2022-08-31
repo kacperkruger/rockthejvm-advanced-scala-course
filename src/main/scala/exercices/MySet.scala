@@ -17,6 +17,8 @@ trait MySet[A] extends (A => Boolean) {
   def -(elem: A): MySet[A]
   def intersect(anotherSet: MySet[A]): MySet[A]
   def --(anotherSet: MySet[A]): MySet[A]
+
+  def unary_! : MySet[A]
 }
 
 class EmptySet[A] extends MySet[A] {
@@ -32,7 +34,35 @@ class EmptySet[A] extends MySet[A] {
   override def -(elem: A): MySet[A] = this
   override def intersect(anotherSet: MySet[A]): MySet[A] = this
   override def --(anotherSet: MySet[A]): MySet[A] = anotherSet
+
+  def unary_! : MySet[A] = new PropertyBasedSet[A](_ => true)
 }
+
+class PropertyBasedSet[A](property: A => Boolean) extends MySet[A] {
+  def contains(elem: A): Boolean = property(elem)
+  //  newProperty(x) = property(x) || elem
+  def +(elem: A): MySet[A] =
+    new PropertyBasedSet[A](x => property(x) || x == elem)
+  //  newProperty(x) = property(x) || anotherSet(x)
+  def ++(anotherSet: MySet[A]): MySet[A] =
+    new PropertyBasedSet[A](x => property(x) || anotherSet.contains(x))
+
+  def map[B](f: A => B): MySet[B] = politelyFail
+  def flatMap[B](f: A => MySet[B]): MySet[B] = politelyFail
+  def foreach(f: A => Unit): Unit = politelyFail
+
+  def filter(predicate: A => Boolean): MySet[A] =
+    new PropertyBasedSet[A](x => property(x) && predicate(x))
+
+  def -(elem: A): MySet[A] = filter(x => x != elem)
+
+  def --(anotherSet: MySet[A]): MySet[A] = filter(!anotherSet)
+  def intersect(anotherSet: MySet[A]): MySet[A] = filter(anotherSet)
+  def unary_! : MySet[A] = new PropertyBasedSet[A](x => !property(x))
+
+  def politelyFail = throw new RuntimeException("Really deep rabid hole!")
+}
+
 class NotEmptySet[A](head: A, tail: MySet[A]) extends MySet[A] {
   override def contains(elem: A): Boolean =
     if (head == elem) true else tail.contains(elem)
@@ -61,6 +91,8 @@ class NotEmptySet[A](head: A, tail: MySet[A]) extends MySet[A] {
 
   override def --(anotherSet: MySet[A]): MySet[A] = filter(x => !anotherSet(x))
 
+  override def unary_! : MySet[A] = new PropertyBasedSet[A](x => !contains(x))
+
 }
 
 object MySet {
@@ -79,4 +111,5 @@ object MySetPlayground extends App {
 //  println(s intersect newSet foreach println)
 //  println(s difference newSet foreach println)
   println(s - 2 foreach println)
+  println(!s(1))
 }
