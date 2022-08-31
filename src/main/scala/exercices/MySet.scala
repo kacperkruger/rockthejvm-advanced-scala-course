@@ -13,6 +13,10 @@ trait MySet[A] extends (A => Boolean) {
   def flatMap[B](f: A => MySet[B]): MySet[B]
   def filter(predicate: A => Boolean): MySet[A]
   def foreach(f: A => Unit): Unit
+
+  def -(elem: A): MySet[A]
+  def intersect(anotherSet: MySet[A]): MySet[A]
+  def --(anotherSet: MySet[A]): MySet[A]
 }
 
 class EmptySet[A] extends MySet[A] {
@@ -24,11 +28,14 @@ class EmptySet[A] extends MySet[A] {
   override def flatMap[B](f: A => MySet[B]): MySet[B] = new EmptySet[B]
   override def filter(predicate: A => Boolean): MySet[A] = this
   override def foreach(f: A => Unit): Unit = ()
+
+  override def -(elem: A): MySet[A] = this
+  override def intersect(anotherSet: MySet[A]): MySet[A] = this
+  override def --(anotherSet: MySet[A]): MySet[A] = anotherSet
 }
 class NotEmptySet[A](head: A, tail: MySet[A]) extends MySet[A] {
   override def contains(elem: A): Boolean =
     if (head == elem) true else tail.contains(elem)
-
   override def +(elem: A): MySet[A] =
     if (this.contains(elem)) this else new NotEmptySet[A](elem, this)
 
@@ -47,6 +54,18 @@ class NotEmptySet[A](head: A, tail: MySet[A]) extends MySet[A] {
     f(head)
     tail.foreach(f)
   }
+
+  override def -(elem: A): MySet[A] = this.filter(x => x != elem)
+
+  override def intersect(anotherSet: MySet[A]): MySet[A] = if (
+    anotherSet.contains(this.head)
+  ) tail.intersect(anotherSet) + head
+  else tail.intersect(anotherSet)
+
+  override def --(anotherSet: MySet[A]): MySet[A] = if (
+    !anotherSet.contains(this.head)
+  ) tail.difference(anotherSet) + head
+  else tail.difference(anotherSet)
 }
 
 object MySet {
@@ -60,6 +79,9 @@ object MySet {
 
 object MySetPlayground extends App {
   val s = MySet(1, 2, 3)
-  ((s + 5) ++ MySet(-1, -2) + 3).foreach(println)
+//  ((s + 5) ++ MySet(-1, -2) + 3).foreach(println)
   val newSet = s.flatMap(x => MySet(x, x * 10))
+//  println(s intersect newSet foreach println)
+//  println(s difference newSet foreach println)
+  println(s - 2 foreach println)
 }
