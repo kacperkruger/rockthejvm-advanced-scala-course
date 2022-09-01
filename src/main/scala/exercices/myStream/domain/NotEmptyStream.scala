@@ -19,9 +19,9 @@ class NotEmptyStream[+A](headElem: A, tailElems: => MyStream[A])
     tail.foreach(f)
   }
   def map[B](f: A => B): MyStream[B] =
-    new NotEmptyStream[B](f(headElem), tail.map(f))
+    new NotEmptyStream[B](f(head), tail.map(f))
   def flatMap[B](f: A => MyStream[B]): MyStream[B] =
-    f(headElem) ++ tail.flatMap(f)
+    f(head) ++ tail.flatMap(f)
   def filter(predicate: A => Boolean): MyStream[A] = if (predicate(head))
     new NotEmptyStream[A](head, tail.filter(predicate))
   else tail.filter(predicate)

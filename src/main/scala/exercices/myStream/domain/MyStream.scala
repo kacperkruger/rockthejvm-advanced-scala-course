@@ -20,7 +20,7 @@ abstract class MyStream[+A] {
 
   @tailrec
   final def toList[B >: A](acc: List[B] = Nil): List[B] =
-    if (isEmpty) acc else tail.toList(head :: acc)
+    if (isEmpty) acc.reverse else tail.toList(head :: acc)
 }
 
 object MyStream {
