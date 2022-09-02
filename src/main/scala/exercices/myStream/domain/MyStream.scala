@@ -8,7 +8,7 @@ abstract class MyStream[+A] {
   def tail: MyStream[A]
 
   def #::[B >: A](element: B): MyStream[B] // prepend
-  def ++[B >: A](anotherStream: MyStream[B]): MyStream[B] // concatenate
+  def ++[B >: A](anotherStream: => MyStream[B]): MyStream[B] // concatenate
 
   def foreach(f: A => Unit): Unit
   def map[B](f: A => B): MyStream[B]

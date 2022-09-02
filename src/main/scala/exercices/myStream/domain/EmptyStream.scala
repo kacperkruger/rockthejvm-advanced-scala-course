@@ -8,7 +8,7 @@ class EmptyStream extends MyStream[Nothing] {
   def #::[B >: Nothing](element: B): MyStream[B] =
     new NotEmptyStream[B](element, this)
 
-  def ++[B >: Nothing](anotherStream: MyStream[B]): MyStream[B] =
+  def ++[B >: Nothing](anotherStream: => MyStream[B]): MyStream[B] =
     anotherStream
 
   def foreach(f: Nothing => Unit): Unit = ()
