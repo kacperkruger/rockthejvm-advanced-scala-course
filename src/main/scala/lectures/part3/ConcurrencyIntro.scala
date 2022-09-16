@@ -2,7 +2,7 @@ package lectures.part3
 
 import java.util.concurrent.Executors
 
-object Intro extends App {
+object ConcurrencyIntro extends App {
   val aThread = new Thread(() => println("something in parallel"))
 
   aThread.start() // gives a signal to the JVM to start a thread
