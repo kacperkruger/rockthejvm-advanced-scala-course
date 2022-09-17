@@ -1,5 +1,7 @@
 package lectures.part3
 
+import sun.jvm.hotspot.runtime.PerfMemory.capacity
+
 import scala.collection.mutable
 import scala.util.Random
 
@@ -124,5 +126,78 @@ object ThreadCommunication extends App {
     producer.start()
   }
 
-  prodConsLargeBuffer()
+//  prodConsLargeBuffer()
+
+  /*
+  Prod cons, level 3
+
+      producer1 -> [ ? ? ? ] -> consumer1
+      producer2 ----^     ^--- consumer2
+   */
+
+  class Consumer(id: Int, buffer: mutable.Queue[Int]) extends Thread {
+    override def run(): Unit = {
+      val random = new Random()
+
+      while (true) {
+        buffer.synchronized {
+          while (buffer.isEmpty) {
+            println(s"[consumer $id] buffer empty, waiting")
+            buffer.wait()
+          }
+          // there must be at least ONE value in the buffer
+          val x = buffer.dequeue()
+          println(s"[consumer $id] i consumed $x")
+
+          buffer.notify()
+        }
+        Thread.sleep(random.nextInt(500))
+      }
+    }
+  }
+
+  class ProducerFactory
+
+  class Producer(id: Int, buffer: mutable.Queue[Int], capacity: Int)
+      extends Thread {
+    override def run(): Unit = {
+      val random = new Random()
+      var i = 0
+
+      while (true) {
+        buffer.synchronized {
+          while (buffer.size == capacity) {
+            println(s"[producer $id] buffer is full, waiting")
+            buffer.wait()
+          }
+          println(s"[producer $id] producing $i")
+          buffer.enqueue(i)
+
+          buffer.notify()
+
+          i += 1
+        }
+        Thread.sleep(random.nextInt(500))
+      }
+    }
+  }
+
+  def multiProdConsBuffer(): Unit = {
+    val buffer: mutable.Queue[Int] = new mutable.Queue[Int]()
+    val capacity = 6
+
+    val consumer1 = new Consumer(1, buffer)
+    val consumer2 = new Consumer(2, buffer)
+
+    val producer1 = new Producer(1, buffer, capacity)
+    val producer2 = new Producer(2, buffer, capacity)
+
+    consumer1.start()
+    consumer2.start()
+
+    producer1.start()
+    producer2.start()
+  }
+
+  multiProdConsBuffer()
 }
