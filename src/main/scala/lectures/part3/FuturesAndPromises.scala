@@ -1,9 +1,9 @@
 package lectures.part3
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, Future, Promise}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Random, Success}
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 object FuturesAndPromises extends App {
   def calculateMeaningOfLife: Int = {
@@ -150,4 +150,26 @@ object FuturesAndPromises extends App {
   }
 
   println(BankingApp.purchase("Daniel", "iPhone", "rock the jvm store", 3000))
+
+  // promises
+
+  val promise = Promise[Int]() // "controller" over future
+  val future = promise.future
+
+  future.onComplete {
+    case Success(r) => println(s"[consumer] i've received $r")
+    case Failure(e) => e.printStackTrace()
+  }
+
+  val producer = new Thread(() => {
+    println("[producer] crunching numbers")
+    Thread.sleep(500)
+    // "fulfilling the promise
+    promise.success(44)
+    println("[producer] done")
+  })
+
+  Thread.sleep(1000)
+
+  producer.start()
 }
