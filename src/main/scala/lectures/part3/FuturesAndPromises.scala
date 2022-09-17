@@ -85,4 +85,19 @@ object FuturesAndPromises extends App {
   } mark.poke(bill)
 
   Thread.sleep(1000)
+
+  // fallbacks
+  val aProfileNoMatterWhat = SocialNetwork.fetchProfile("unknown_id").recover {
+    case _: Throwable => Profile("fb.id.0-dummy", "Forever Alone")
+  }
+
+  val aFetchProfileNoMatterWhat =
+    SocialNetwork.fetchProfile("unknown_id").recoverWith { case _: Throwable =>
+      SocialNetwork.fetchProfile("fb.id.0-dummy")
+    }
+
+  val fallbackResult = SocialNetwork
+    .fetchProfile("unknown_id")
+    .fallbackTo(SocialNetwork.fetchProfile("fb.id.0-dummy"))
+
 }
