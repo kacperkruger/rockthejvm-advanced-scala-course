@@ -1,8 +1,9 @@
 package lectures.part3
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Random, Success}
+import scala.concurrent.duration._
 
 object FuturesAndPromises extends App {
   def calculateMeaningOfLife: Int = {
@@ -100,4 +101,53 @@ object FuturesAndPromises extends App {
     .fetchProfile("unknown_id")
     .fallbackTo(SocialNetwork.fetchProfile("fb.id.0-dummy"))
 
+  // online banking app
+  case class User(name: String)
+  case class Transaction(
+      sender: String,
+      receiver: String,
+      amount: Double,
+      status: String
+  )
+
+  object BankingApp {
+    val name = "Rock the JVM Banking"
+
+    def fetchUser(name: String): Future[User] = Future {
+      Thread.sleep(400)
+      User(name)
+    }
+
+    def createTransaction(
+        user: User,
+        merchantName: String,
+        amount: Double
+    ): Future[Transaction] = Future {
+      Thread.sleep(1001)
+      Transaction(user.name, merchantName, amount, "Success")
+    }
+
+    def purchase(
+        username: String,
+        item: String,
+        merchantName: String,
+        cost: Double
+    ): String = {
+      // fetch user from DB
+      // create transaction
+      // wait for the transaction to finish
+
+      val transactionStatusFuture = for {
+        user <- fetchUser(username)
+        transaction <- createTransaction(user, merchantName, cost)
+      } yield transaction.status
+
+      Await.result(
+        transactionStatusFuture,
+        5.seconds
+      ) // implicit conversions -> pimp my library
+    }
+  }
+
+  println(BankingApp.purchase("Daniel", "iPhone", "rock the jvm store", 3000))
 }
