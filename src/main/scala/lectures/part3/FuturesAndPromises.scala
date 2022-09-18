@@ -2,7 +2,7 @@ package lectures.part3
 
 import scala.concurrent.{Await, Future, Promise}
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Failure, Random, Success}
+import scala.util.{Failure, Random, Success, Try}
 import scala.concurrent.duration.*
 
 object FuturesAndPromises extends App {
@@ -172,4 +172,60 @@ object FuturesAndPromises extends App {
   Thread.sleep(1000)
 
   producer.start()
+
+  // 1
+  def fulfillImmediately[T](value: T): Future[T] = Future.successful(value)
+
+  // 2
+  def inSequence[A, B](fa: Future[A], fb: Future[B]): Future[B] =
+    fa.flatMap(_ => fb)
+
+  // 3
+  def firstFuture[A](fa: Future[A], fb: Future[A]): Future[A] = {
+    val promise = Promise[A]()
+//    fa.onComplete {
+//      case Success(value) =>
+//        try {
+//          promise.success(value)
+//        } catch {
+//          case _: Throwable =>
+//        }
+//      case Failure(e) =>
+//        try {
+//          promise.failure(e)
+//        } catch {
+//          case _: Throwable =>
+//        }
+//    }
+
+    fa.onComplete(promise.tryComplete)
+    fb.onComplete(promise.tryComplete)
+
+    promise.future
+  }
+
+  def lastFuture[A](fa: Future[A], fb: Future[A]): Future[A] = {
+    val bothPromise = Promise[A]()
+    val lastPromise = Promise[A]()
+
+    def checkAndComplete(result: Try[A]): Unit =
+      if (!bothPromise.tryComplete(result)) lastPromise.complete(result)
+
+    fa.onComplete(checkAndComplete)
+    fb.onComplete(checkAndComplete)
+
+    lastPromise.future
+  }
+
+  def retryUntil[A](
+      action: () => Future[A],
+      condition: A => Boolean
+  ): Future[A] = {
+    action()
+      .filter(condition)
+      .recoverWith { case _ =>
+        retryUntil(action, condition)
+      }
+  }
+
 }
