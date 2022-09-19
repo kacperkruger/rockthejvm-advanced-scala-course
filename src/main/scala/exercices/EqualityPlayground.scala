@@ -1,5 +1,6 @@
 package exercices
 
+import exercices.EqualityPlayground.UserFullEquality
 import lectures.part4.TypeClasses.User
 
 object EqualityPlayground extends App {
@@ -27,4 +28,16 @@ object EqualityPlayground extends App {
   println(Equal(john, anotherJohn))
 
   // AD-HOC polymorphism
+
+  implicit class EqualEnrichment[T](value: T) {
+    def ===(anotherValue: T)(implicit equalizer: Equal[T]): Boolean =
+      equalizer(value, anotherValue)
+
+    def !==(anotherValue: T)(implicit equalizer: Equal[T]): Boolean =
+      !equalizer(value, anotherValue)
+  }
+
+  println(john === anotherJohn)
+  println(john !== anotherJohn)
+
 }
