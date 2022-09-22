@@ -74,4 +74,55 @@ object Variance extends App {
       - method arguments are in CONTRAVARIANT position
       - return types are in COVARIANT position
    */
+
+  class Vehicle
+  class Bike extends Vehicle
+  class Car extends Vehicle
+
+  class IList[T]
+
+  class InvariantParking[T](things: List[T]) {
+    def park(vehicle: T): InvariantParkingIList[T] = ???
+    def impound(vehicles: List[T]): InvariantParkingIList[T] = ???
+    def checkVehicles(conditions: String): List[T] = ???
+
+    def flatMap[S](f: T => InvariantParking[S]): InvariantParking[S] = ???
+  }
+
+  class CovariantParking[+T](things: List[T]) {
+    def park[S >: T](vehicle: S): CovariantParking[S] = ???
+    def impound[S >: T](vehicles: List[S]): CovariantParking[S] = ???
+    def checkVehicles(conditions: String): List[T] = ???
+
+    def flatMap[S](f: T => CovariantParking[S]): CovariantParking[S] = ???
+  }
+
+  class ContravariantParking[-T](things: List[T]) {
+    def park(vehicle: T): ContravariantParking[T] = ???
+    def impound(vehicles: List[T]): ContravariantParking[T] = ???
+    def checkVehicles[S <: T](conditions: String): List[S] = ???
+
+    def flatMap[S](
+        f: T => ContravariantParking[S]
+    ): ContravariantParking[S] = ???
+  }
+
+  class InvariantParkingIList[T](things: IList[T]) {
+    def park(vehicle: T): InvariantParkingIList[T] = ???
+    def impound(vehicles: IList[T]): InvariantParkingIList[T] = ???
+    def checkVehicles(conditions: String): IList[T] = ???
+  }
+
+  class CovariantParkingIList[+T](things: IList[T]) {
+    def park[S >: T](vehicle: S): CovariantParkingIList[S] = ???
+    def impound[S >: T](vehicles: IList[S]): CovariantParkingIList[S] = ???
+    def checkVehicles[S >: T](conditions: String): IList[S] = ???
+  }
+
+  class ContravariantParkingIList[-T](things: IList[T]) {
+    def park(vehicle: T): ContravariantParkingIList[T] = ???
+    def impound[S <: T](vehicles: IList[S]): ContravariantParkingIList[S] = ???
+    def checkVehicles[S <: T](conditions: String): IList[S] = ???
+  }
+
 }
