@@ -102,8 +102,8 @@ object Variance extends App {
     def impound(vehicles: List[T]): ContravariantParking[T] = ???
     def checkVehicles[S <: T](conditions: String): List[S] = ???
 
-    def flatMap[S](
-        f: T => ContravariantParking[S]
+    def flatMap[R <: T, S](
+        f: R => ContravariantParking[S]
     ): ContravariantParking[S] = ???
   }
 
